@@ -1,7 +1,11 @@
 # Release History
 
-## 1.12.1 (Unreleased)
+## 1.13.0 (Unreleased)
 
+### Features
+
+- Added `azure.core.pipeline.policies.ChallengeAuthenticationPolicy` and
+  `.AsyncChallengeAuthenticationPolicy`
 
 ## 1.12.0 (2021-03-08)
 
