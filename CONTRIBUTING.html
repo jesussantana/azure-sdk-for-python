@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Contributing to Azure Python SDK | Azure SDK for Python </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Contributing to Azure Python SDK | Azure SDK for Python ">
+    <meta name="generator" content="docfx 2.43.2.0">
+    
+    <link rel="shortcut icon" href="https://c.s-microsoft.com/favicon.ico?v2">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="navtoc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    <meta property="docfx:newtab" content="true">
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="contributing-to-azure-python-sdk">Contributing to Azure Python SDK</h1>
+
+<p>If you would like to become an active contributor to this project please
+follow the instructions provided in <a href="https://opensource.microsoft.com/collaborate/">Microsoft Azure Projects Contribution Guidelines</a>.</p>
+<h2 id="building-and-testing">Building and Testing</h2>
+<p>The Azure SDK team's Python CI leverages the tool <code>tox</code> to distribute tests to virtual environments, handle test dependency installation, and coordinate tooling reporting during PR/CI builds. This means that a dev working locally can reproduce <em>exactly</em> what the build machine is doing.</p>
+<p><a href="https://tox.readthedocs.io/en/latest/">A Brief Overview of Tox</a></p>
+<h4 id="a-monorepo-and-tox-in-harmony">A Monorepo and Tox in Harmony</h4>
+<p>Traditionally, the <code>tox.ini</code> file for a package sits <em>alongside the setup.py</em> in source code. The <code>azure-sdk-for-python</code> necessarily does not adhere to this policy. There are over one-hundred packages contained here-in. That's a lot of <code>tox.ini</code> files to maintain!</p>
+<p>Instead, the CI system leverages an tox plugin called <code>tox-monorepo</code>. This plugin allows <code>tox</code> to act as if the <code>tox.ini</code> is located in whatever directory you executed tox in!</p>
+<h4 id="tox-environments">Tox Environments</h4>
+<p>A given <code>tox.ini</code> works on the concept of <code>test environments</code>. A given test environment is a combination of:</p>
+<ol>
+<li>An identifier (or identifiers)</li>
+<li>A targeted Python version
+<ol>
+<li><code>tox</code> will default to base python executing the <code>tox</code> command if no Python environment is specified</li>
+</ol>
+</li>
+<li>(optionally) an OS platform</li>
+</ol>
+<p>Internally <code>tox</code> leverages <code>virtualenv</code> to create each test environment's virtual environment.</p>
+<p>This means that once the <code>tox</code> workflow is in place, all tests will be executed <em>within a virtual environment.</em></p>
+<p>To see the default environments from a specific <code>tox.ini</code> file, use the command <code>tox -l</code> in the same directory as the file itself.</p>
+<blockquote>
+<p>sdk-for-python/eng/tox&gt; tox -l</p>
+</blockquote>
+<pre><code>
+whl
+sdist
+
+</code></pre>
+<p>Unfortunately, the command <code>tox -l</code> only returns the <em>default</em> test builds. The common <code>tox.ini</code> file also supports <code>lint</code> and <code>mypy</code> environments.</p>
+<h3 id="example-usage-of-the-common-azure-sdk-for-python-toxini">Example Usage of the common Azure SDK For Python <code>tox.ini</code></h3>
+<p>Basic usage of <code>tox</code> within this monorepo is:</p>
+<ol>
+<li><code>pip install tox tox-monorepo</code></li>
+<li><code>cd</code> to target package folder</li>
+<li>run <code>tox -c path/to/tox.ini</code></li>
+</ol>
+<p>The common <code>tox.ini</code> location is <code>eng/tox/tox.ini</code> within the repository.</p>
+<p>If at any time you want to blow away the tox created virtual environments and start over, simply append <code>-r</code> to any tox invocation!</p>
+<h4 id="example-azure-core-mypy">Example <code>azure-core</code> mypy</h4>
+<ol>
+<li><code>cd</code> to <code>sdk/core/azure-core</code></li>
+<li>Run <code>tox -e mypy -c eng/tox/tox.ini</code></li>
+</ol>
+<h4 id="example-azure-storage-blob-tests">Example <code>azure-storage-blob</code> tests</h4>
+<ol>
+<li><code>cd</code> to <code>sdk/storage/azure-storage-blob</code></li>
+<li>Execute <code>tox -c eng/tox/tox.ini</code></li>
+</ol>
+<p>Note that we didn't provide an <code>environment</code> argument for this example. Reason here is that the <em>default</em> environment selected by our common <code>tox.ini</code> file is one that runs <code>pytest</code>.</p>
+<h4 id="whl-environment"><code>whl</code> environment</h4>
+<p>Used for test execution across the spectrum of all the platforms we want to support. Maintained at a <code>platform specific</code> level just in case we run into platform-specific bugs.</p>
+<ul>
+<li>Installs the wheel, runs tests using the wheel</li>
+</ul>
+<pre><code>\&gt; tox -e whl -c &lt;path to tox.ini&gt;
+
+</code></pre>
+<h4 id="sdist-environment"><code>sdist</code> environment</h4>
+<p>Used for the local dev loop.</p>
+<ul>
+<li>Installs package in editable mode</li>
+<li>Runs tests using the editable mode installation, not the wheel</li>
+</ul>
+<pre><code>
+\&gt; tox -e sdist -c &lt;path to tox.ini&gt;
+
+</code></pre>
+<h4 id="lint-environment"><code>lint</code> environment</h4>
+<p>Pylint install and run.</p>
+<pre><code>\&gt; tox -e lint -c &lt;path to tox.ini&gt;
+</code></pre>
+<h4 id="mypy-environment"><code>mypy</code> environment</h4>
+<p>Mypy install and run.</p>
+<pre><code>\&gt; tox -e mypy -c &lt;path to tox.ini&gt;
+</code></pre>
+<h3 id="custom-pytest-arguments">Custom Pytest Arguments</h3>
+<p><code>tox</code> supports custom arguments, and the defined pytest environments within the common <code>tox.ini</code> also allow these. Essentially, separate the arguments you want passed to <code>pytest</code> by a <code>--</code> in your tox invocation.</p>
+<p><a href="https://tox.readthedocs.io/en/latest/example/general.html#interactively-passing-positional-arguments">Tox Documentation on Positional Arguments</a></p>
+<p><strong>Example: Invoke tox, breaking into the debugger on failure</strong>
+<code>tox -e whl -c eng/tox/tox.ini -- --pdb</code></p>
+<h3 id="performance-testing">Performance Testing</h3>
+<p>SDK performance testing is supported via the custom <code>perfstress</code> framework. For full details on this framework, and how to write and run tests for an SDK - see the <a href="https://github.com/Azure/azure-sdk-for-python/blob/master/doc/dev/perfstress_tests.md">perfstress tests documentation</a>.</p>
+<h3 id="more-reading">More Reading</h3>
+<p>We maintain an <a href="https://github.com/Azure/azure-sdk-for-python/blob/master/doc/eng_sys_checks.md">additional document</a> that has a ton of detail as to what is actually <em>happening</em> in these executions.</p>
+<h3 id="dev-feed">Dev Feed</h3>
+<p>Daily dev build version of Azure sdk packages for python are available and are uploaded to Azure devops feed daily. We have also created a tox environment to test a package against dev built version of dependent packages. Below is the link to Azure devops feed.
+<a href="https://dev.azure.com/azure-sdk/public/_packaging?_a=feed&amp;feed=azure-sdk-for-python"><code>https://dev.azure.com/azure-sdk/public/_packaging?_a=feed&amp;feed=azure-sdk-for-python</code></a></p>
+<h5 id="to-install-latest-dev-build-version-of-a-package">To install latest dev build version of a package</h5>
+<pre><code>pip install &lt;package-name&gt; --extra-index-url https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-python/pypi/simple --pre
+</code></pre>
+<h4 id="to-install-a-specific-dev-build-version-of-a-package">To Install a specific dev build version of a package</h4>
+<p>For e.g.</p>
+<pre><code>pip install azure-appconfiguration==1.0.0b6.dev20191205001 --extra-index-url https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-python/pypi/simple
+</code></pre>
+<p>To test a package being developed against latest dev build version of dependent packages:
+a. cd to package root folder
+b. run tox environment devtest</p>
+<pre><code>\&gt; tox -e devtest -c &lt;path to tox.ini&gt;
+</code></pre>
+<p>This tox test( devtest) will fail if installed dependent packages are not dev build version.</p>
+<h2 id="code-of-conduct">Code of Conduct</h2>
+<p>This project's code of conduct can be found in the
+<a href="https://github.com/Azure/azure-sdk-for-python/blob/master/CODE_OF_CONDUCT.md">CODE_OF_CONDUCT.md file</a>
+(v1.4.0 of the <a href="https://contributor-covenant.org/">https://contributor-covenant.org/</a> CoC).</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Azure SDK for Python
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>
